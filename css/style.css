@@ -70,21 +70,13 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .table-row span:last-child { color: #416c4f; }
 .table-empty { margin: 0; padding: 22px 19px; color: var(--muted); font-size: 13px; }
 
-/* 韓語篩選與語句卡片 */
-.phrase-editor, .photo-translator { margin-bottom: 16px; padding: 17px 18px; }
-.phrase-editor summary { cursor: pointer; font-size: 14px; font-weight: 800; }
-.phrase-editor form { display: grid; gap: 8px; margin-top: 16px; }
-.phrase-editor label, .photo-translator > label { font-size: 13px; font-weight: 700; }
-.phrase-editor input, .photo-translator input { width: 100%; min-height: 42px; padding: 8px 11px; border: 1px solid #cbd8c8; border-radius: 9px; background: var(--surface); color: var(--ink); }
-.phrase-form-actions, .phrase-actions { display: flex; flex-wrap: wrap; gap: 7px; }
-.phrase-form-actions button, .phrase-actions button, #photo-save { min-height: 35px; padding: 6px 10px; border: 1px solid #cbd8c8; border-radius: 9px; background: #f5f9ee; color: var(--ink); font-size: 12px; font-weight: 700; }
-.phrase-form-actions button[type="submit"] { background: var(--accent); }
-.photo-translator > label { display: block; margin-bottom: 9px; }
-.photo-translator .field-hint { line-height: 1.5; }
-.photo-translator .note:empty { display: none; }
-#photo-result { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
-.photo-result-label { margin: 10px 0 3px; color: var(--muted); font-size: 12px; font-weight: 700; }
-.photo-result-text { margin: 0 0 10px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+/* 外部翻譯入口與常用語卡片 */
+.translate-link, .photo-link { display: flex; align-items: center; justify-content: center; min-height: 46px; padding: 11px 16px; border-radius: 12px; font-size: 14px; font-weight: 700; text-align: center; text-decoration: none; }
+.translate-link { margin-top: 12px; background: var(--ink); color: var(--surface); }
+.photo-link { margin-top: 22px; color: var(--ink); }
+.phrase-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+.phrase-actions button { min-height: 35px; padding: 6px 10px; border: 1px solid #cbd8c8; border-radius: 9px; background: #f5f9ee; color: var(--ink); font-size: 12px; font-weight: 700; }
+.pins-heading { margin: 26px 0 12px; font-size: 17px; }
 .search-input { width: 100%; min-height: 50px; padding: 0 15px; border: 1px solid #cbd8c8; border-radius: 12px; background: var(--surface); color: var(--ink); font-size: 15px; }
 .filter-list { display: flex; gap: 8px; overflow-x: auto; padding: 15px 0 17px; scrollbar-width: none; }
 .filter-list::-webkit-scrollbar { display: none; }
@@ -93,7 +85,6 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .phrase-list { display: grid; gap: 11px; }
 .phrase-card { padding: 17px 18px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); }
 .phrase-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-.phrase-actions { justify-content: flex-end; }
 .phrase-category { margin: 0 0 7px; color: #63846c; font-size: 11px; font-weight: 800; }
 .phrase-chinese { margin: 0; font-size: 15px; font-weight: 700; }
 .phrase-korean { margin: 10px 0 3px; font-size: 24px; font-weight: 800; line-height: 1.35; }

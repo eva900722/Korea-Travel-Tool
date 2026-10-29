@@ -1,41 +1,22 @@
-const STORAGE_KEY = 'korea-travel-phrases-v1';
+const STORAGE_KEY = 'korea-travel-phrases-v2';
+const PINS_KEY = 'korea-travel-pins-v1';
+const OLD_PHRASES_KEY = 'korea-travel-phrases-v1';
 const PINNED_FILTER = Symbol('pinned');
 
 export async function initPhrases() {
   const search = document.getElementById('phrase-search');
+  const link = document.getElementById('translate-link');
+  const status = document.getElementById('phrase-status');
+  const listSearch = document.getElementById('phrase-filter-search');
   const filters = document.getElementById('phrase-filters');
   const list = document.getElementById('phrase-list');
-  const status = document.getElementById('phrase-status');
-  const editor = document.getElementById('phrase-editor');
-  const editorTitle = document.getElementById('phrase-editor-title');
-  const form = document.getElementById('phrase-form');
-  const cancel = document.getElementById('phrase-cancel');
-  const photoInput = document.getElementById('photo-input');
-  const photoStatus = document.getElementById('photo-status');
-  const photoResult = document.getElementById('photo-result');
-  const photoOriginal = document.getElementById('photo-original');
-  const photoTranslated = document.getElementById('photo-translated');
-  const photoSave = document.getElementById('photo-save');
+  const listStatus = document.getElementById('phrase-list-status');
   let phrases = [];
   let category = '全部';
-  let editingId = null;
-
-  // 自訂內容與釘選保存在此裝置，初次使用才載入內建句庫。
-  function commit(next) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      phrases = next;
-      render();
-      return true;
-    } catch {
-      status.textContent = '無法儲存變更，請確認瀏覽器允許儲存網站資料。';
-      return false;
-    }
-  }
 
   function speak(korean) {
     if (!('speechSynthesis' in window)) {
-      status.textContent = '此瀏覽器不支援語音朗讀，仍可查看韓文與拼音。';
+      listStatus.textContent = '此瀏覽器不支援語音朗讀。';
       return;
     }
     const voice = new SpeechSynthesisUtterance(korean);
@@ -47,16 +28,19 @@ export async function initPhrases() {
     speechSynthesis.speak(voice);
   }
 
-  function resetEditor() {
-    editingId = null;
-    form.reset();
-    editorTitle.textContent = '＋ 新增句子';
-    cancel.hidden = true;
-    editor.open = false;
+  // 釘選與刪除都儲存在此裝置，重新開啟後維持原狀。
+  function save(next) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      phrases = next;
+      render();
+    } catch {
+      listStatus.textContent = '無法儲存變更，請確認瀏覽器允許儲存網站資料。';
+    }
   }
 
   function renderList() {
-    const query = search.value.trim().toLocaleLowerCase();
+    const query = listSearch.value.trim().toLocaleLowerCase();
     const matches = phrases.filter((item) =>
       (category === '全部' || (category === PINNED_FILTER ? item.pinned : item.category === category)) &&
       [item.chinese, item.korean, item.romanization].some((value) => value.toLocaleLowerCase().includes(query))
@@ -82,40 +66,23 @@ export async function initPhrases() {
       pin.textContent = item.pinned ? '★ 已釘選' : '☆ 釘選';
       pin.setAttribute('aria-pressed', String(item.pinned));
       pin.setAttribute('aria-label', `${item.pinned ? '取消釘選' : '釘選'}：${item.chinese}`);
-      pin.addEventListener('click', () => commit(phrases.map((phrase) =>
+      pin.addEventListener('click', () => save(phrases.map((phrase) =>
         phrase.id === item.id ? { ...phrase, pinned: !phrase.pinned } : phrase
       )));
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'speak-button';
-      button.textContent = '▶ 發音';
-      button.setAttribute('aria-label', `朗讀韓文：${item.korean}`);
-      button.addEventListener('click', () => speak(item.korean));
-      const edit = document.createElement('button');
-      edit.type = 'button';
-      edit.textContent = '編輯';
-      edit.setAttribute('aria-label', `編輯：${item.chinese}`);
-      edit.addEventListener('click', () => {
-        editingId = item.id;
-        form.elements.chinese.value = item.chinese;
-        form.elements.korean.value = item.korean;
-        form.elements.category.value = item.category;
-        form.elements.romanization.value = item.romanization;
-        editorTitle.textContent = '編輯句子';
-        cancel.hidden = false;
-        editor.open = true;
-        form.elements.chinese.focus();
-      });
+      const speakButton = document.createElement('button');
+      speakButton.type = 'button';
+      speakButton.className = 'speak-button';
+      speakButton.textContent = '▶ 發音';
+      speakButton.setAttribute('aria-label', `朗讀韓文：${item.korean}`);
+      speakButton.addEventListener('click', () => speak(item.korean));
       const remove = document.createElement('button');
       remove.type = 'button';
       remove.textContent = '刪除';
       remove.setAttribute('aria-label', `刪除：${item.chinese}`);
       remove.addEventListener('click', () => {
-        if (confirm(`確定刪除「${item.chinese}」？`)) {
-          if (commit(phrases.filter((phrase) => phrase.id !== item.id)) && editingId === item.id) resetEditor();
-        }
+        if (confirm(`確定刪除「${item.chinese}」？`)) save(phrases.filter((phrase) => phrase.id !== item.id));
       });
-      actions.append(pin, button, edit, remove);
+      actions.append(pin, speakButton, remove);
       top.append(intro, actions);
       const korean = document.createElement('p');
       korean.className = 'phrase-korean';
@@ -130,10 +97,10 @@ export async function initPhrases() {
     if (!matches.length) {
       const empty = document.createElement('p');
       empty.className = 'empty-message';
-      empty.textContent = '找不到符合的語句，試試其他關鍵字或新增句子。';
+      empty.textContent = '找不到符合的語句。';
       list.append(empty);
     }
-    status.textContent = `顯示 ${matches.length} 句常用語。發音功能依裝置的韓語語音支援而定。`;
+    listStatus.textContent = `顯示 ${matches.length} 句常用語。發音功能依裝置的韓語語音支援而定。`;
   }
 
   function renderFilters() {
@@ -160,92 +127,81 @@ export async function initPhrases() {
     renderList();
   }
 
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const entry = {
-      category: form.elements.category.value.trim(),
-      chinese: form.elements.chinese.value.trim(),
-      korean: form.elements.korean.value.trim(),
-      romanization: form.elements.romanization.value.trim()
-    };
-    if (!entry.category || !entry.chinese || !entry.korean) return;
-    const next = editingId
-      ? phrases.map((item) => item.id === editingId ? { ...item, ...entry } : item)
-      : [...phrases, { ...entry, id: `custom-${crypto.randomUUID()}`, pinned: false }];
-    if (commit(next)) resetEditor();
-  });
-  cancel.addEventListener('click', resetEditor);
-  search.addEventListener('input', renderList);
+  listSearch.addEventListener('input', renderList);
 
-  // 照片在選取後立即送往本站 API；僅保存使用者主動加入的翻譯結果。
-  photoInput.addEventListener('change', async () => {
-    const file = photoInput.files?.[0];
-    if (!file) return;
-    photoResult.hidden = true;
-    photoInput.disabled = true;
-    photoStatus.textContent = '正在辨識並翻譯照片…';
+  // 文字會帶入 Google 翻譯網址，並盡可能複製到剪貼簿。
+  search.addEventListener('input', () => {
+    const text = search.value.trim();
+    const url = new URL('https://translate.google.com/');
+    if (text) {
+      url.searchParams.set('sl', 'zh-TW');
+      url.searchParams.set('tl', 'ko');
+      url.searchParams.set('text', text);
+      url.searchParams.set('op', 'translate');
+    }
+    link.href = url.toString();
+    status.textContent = text ? '' : '先輸入中文，再開啟 Google 翻譯。';
+  });
+  link.addEventListener('click', (event) => {
+    const text = search.value.trim();
+    if (!text) {
+      event.preventDefault();
+      status.textContent = '請先輸入想說的中文。';
+      search.focus();
+      return;
+    }
     try {
-      if (!file.type.startsWith('image/')) throw new Error('請選擇照片檔案。');
-      const image = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error('無法讀取照片。'));
-        reader.readAsDataURL(file);
-      });
-      const photo = new Image();
-      photo.src = image;
-      await photo.decode();
-      const scale = Math.min(1, 1600 / Math.max(photo.width, photo.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(photo.width * scale);
-      canvas.height = Math.round(photo.height * scale);
-      canvas.getContext('2d').drawImage(photo, 0, 0, canvas.width, canvas.height);
-      const encoded = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-      if (encoded.length > 4_000_000) throw new Error('照片過大，請改用較小的照片。');
-      const response = await fetch('./api/photo-translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ image: encoded })
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || '翻譯失敗，請稍後重試。');
-      photoOriginal.textContent = result.original;
-      photoTranslated.textContent = result.translated;
-      photoResult.hidden = false;
-      photoStatus.textContent = '翻譯完成。';
-    } catch (error) {
-      photoStatus.textContent = error.message || '翻譯失敗，請稍後重試。';
-    } finally {
-      photoInput.disabled = false;
-      photoInput.value = '';
+      if (navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(text)
+          .then(() => { status.textContent = '已複製中文，可在 Google 翻譯貼上。'; })
+          .catch(() => { status.textContent = '無法自動複製；若文字未帶入，請手動複製。'; });
+      } else {
+        search.select();
+        const copied = document.execCommand?.('copy');
+        status.textContent = copied ? '已複製中文，可在 Google 翻譯貼上。' : '無法自動複製；若文字未帶入，請手動複製。';
+      }
+    } catch {
+      status.textContent = '無法自動複製；若文字未帶入，請手動複製。';
     }
   });
-  photoSave.addEventListener('click', () => {
-    resetEditor();
-    form.elements.chinese.value = photoTranslated.textContent.slice(0, 200);
-    form.elements.korean.value = photoOriginal.textContent.slice(0, 200);
-    editor.open = true;
-    form.elements.chinese.focus();
-  });
 
-  status.textContent = '正在載入常用語…';
+  // 先載入已儲存的版本；首次使用則讀取內建句庫，並承接舊版釘選。
+  listStatus.textContent = '正在載入常用語…';
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved !== null) {
-      const data = JSON.parse(saved);
-      if (!Array.isArray(data)) throw new Error('Invalid saved phrases');
-      phrases = data.filter((item) => item && typeof item.id === 'string' &&
-        ['category', 'chinese', 'korean', 'romanization'].every((key) => typeof item[key] === 'string'));
+    const old = saved === null ? localStorage.getItem(OLD_PHRASES_KEY) : null;
+    let data;
+    if (saved !== null || old !== null) {
+      data = JSON.parse(saved ?? old);
     } else {
       const response = await fetch('./data/korean.json');
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = await response.json();
-      if (!Array.isArray(data)) throw new Error('Invalid phrase data');
-      phrases = data.filter((item) => item && ['category', 'chinese', 'korean', 'romanization'].every((key) => typeof item[key] === 'string'))
-        .map((item, index) => ({ ...item, id: `seed-${index}`, pinned: false }));
+      if (!response.ok) throw new Error('無法載入內建句庫');
+      data = await response.json();
+    }
+    if (!Array.isArray(data)) throw new Error('語句資料格式不正確');
+    phrases = data.filter((item) => item && ['category', 'chinese', 'korean', 'romanization']
+      .every((key) => typeof item[key] === 'string'))
+      .map((item, index) => ({ ...item, id: typeof item.id === 'string' ? item.id : `seed-${index}`, pinned: Boolean(item.pinned) }));
+
+    let saveError = false;
+    if (saved === null) {
+      const oldPins = localStorage.getItem(PINS_KEY);
+      if (oldPins !== null) {
+        const storedPins = JSON.parse(oldPins);
+        if (Array.isArray(storedPins)) {
+          const pins = storedPins.filter((pin) => pin && typeof pin.chinese === 'string' && typeof pin.korean === 'string');
+          phrases = phrases.map((item) => ({ ...item, pinned: pins.some((pin) => pin.chinese === item.chinese && pin.korean === item.korean) }));
+          pins.filter((pin) => !phrases.some((item) => item.chinese === pin.chinese && item.korean === pin.korean))
+            .forEach((pin, index) => phrases.push({ id: `pin-${index}`, category: '已收藏',
+              chinese: pin.chinese, korean: pin.korean, romanization: '', pinned: true }));
+        }
+      }
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(phrases)); } catch { saveError = true; }
     }
     render();
+    if (saveError) listStatus.textContent = '常用語已顯示，但無法在此裝置儲存變更。';
   } catch {
-    status.textContent = '無法載入常用語，請連線後重新整理。';
+    listStatus.textContent = '無法載入常用語，請連線後重新整理。';
   }
+  if (!status.textContent) status.textContent = '先輸入中文，再開啟 Google 翻譯。';
 }

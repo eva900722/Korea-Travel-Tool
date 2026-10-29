@@ -94,43 +94,21 @@
           </div>
           <span class="section-icon" aria-hidden="true">가</span>
         </div>
-        <!-- 自訂語句與照片翻譯 -->
-        <details class="phrase-editor card" id="phrase-editor">
-          <summary id="phrase-editor-title">＋ 新增句子</summary>
-          <form id="phrase-form">
-            <label for="phrase-chinese">中文</label>
-            <input id="phrase-chinese" name="chinese" required maxlength="200" autocomplete="off">
-            <label for="phrase-korean">韓文</label>
-            <input id="phrase-korean" name="korean" required maxlength="200" autocomplete="off">
-            <label for="phrase-category">分類</label>
-            <input id="phrase-category" name="category" value="自訂" required maxlength="30" autocomplete="off">
-            <label for="phrase-romanization">羅馬拼音（選填）</label>
-            <input id="phrase-romanization" name="romanization" maxlength="200" autocomplete="off">
-            <div class="phrase-form-actions">
-              <button type="submit">儲存句子</button>
-              <button type="button" id="phrase-cancel" hidden>取消編輯</button>
-            </div>
-          </form>
-        </details>
-        <div class="photo-translator card">
-          <label for="photo-input">拍照翻譯韓文</label>
-          <input id="photo-input" type="file" accept="image/*" capture="environment">
-          <p class="field-hint">拍照或選擇照片後自動翻譯為繁體中文；照片會傳送至 Google Cloud，需要網路連線。</p>
-          <p id="photo-status" class="note" role="status" aria-live="polite"></p>
-          <div id="photo-result" hidden>
-            <p class="photo-result-label">辨識原文</p>
-            <p id="photo-original" class="photo-result-text" lang="ko"></p>
-            <p class="photo-result-label">繁體中文</p>
-            <p id="photo-translated" class="photo-result-text"></p>
-            <button type="button" id="photo-save">存為句子</button>
-          </div>
-        </div>
-        <!-- 搜尋、篩選與語句清單 -->
-        <label class="search-label" for="phrase-search">搜尋常用語</label>
-        <input id="phrase-search" class="search-input" type="search" placeholder="輸入中文、韓文或羅馬拼音" autocomplete="off">
+        <!-- 交由 Google 翻譯處理文字與照片 -->
+        <label class="search-label" for="phrase-search">輸入想說的中文</label>
+        <input id="phrase-search" class="search-input" type="search" placeholder="例如：請問地鐵站在哪裡？" maxlength="200" autocomplete="off">
+        <a id="translate-link" class="translate-link" href="https://translate.google.com/" target="_blank" rel="noopener noreferrer">複製中文並開啟 Google 翻譯 ↗</a>
+        <p class="field-hint">會嘗試帶入並複製文字；若未自動帶入，請在 Google 翻譯貼上。</p>
+        <p id="phrase-status" class="note" role="status"></p>
+        <a class="photo-link card" href="https://translate.google.com/?sl=ko&amp;tl=zh-TW&amp;op=translate" target="_blank" rel="noopener noreferrer">📷 開啟 Google 翻譯拍照 ↗</a>
+        <p class="field-hint">請在 Google 翻譯 App 點選相機；若開啟的是網頁，請切換至 App。</p>
+        <!-- 常用語搜尋、分類與句子卡片 -->
+        <h3 class="pins-heading">旅行常用語</h3>
+        <label class="search-label" for="phrase-filter-search">搜尋常用語</label>
+        <input id="phrase-filter-search" class="search-input" type="search" placeholder="搜尋中文、韓文或羅馬拼音" autocomplete="off">
         <div id="phrase-filters" class="filter-list" aria-label="常用語分類"></div>
         <div id="phrase-list" class="phrase-list"></div>
-        <p id="phrase-status" class="note" role="status"></p>
+        <p id="phrase-list-status" class="note" role="status"></p>
       </section>
     </main>
 

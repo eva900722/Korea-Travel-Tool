@@ -1,4 +1,4 @@
-const CACHE_NAME = 'korea-travel-tool-v2';
+const CACHE_NAME = 'korea-travel-tool-v6';
 const APP_FILES = [
   './', './index.html', './css/style.css', './js/app.js',
   './js/exchange.js', './js/quick-table.js', './js/phrases.js',
@@ -6,7 +6,7 @@ const APP_FILES = [
   './icons/icon-192.png', './icons/icon-512.png'
 ];
 
-// 安裝時預存頁面與語句，初次成功載入後可離線開啟。
+// 安裝時預存頁面與常用語，初次成功載入後可離線查看句子。
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_FILES)).then(() => self.skipWaiting()));
 });
