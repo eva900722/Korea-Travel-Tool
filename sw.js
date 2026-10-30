@@ -1,4 +1,4 @@
-const CACHE_NAME = 'korea-travel-tool-v6';
+const CACHE_NAME = 'korea-travel-tool-v7';
 const APP_FILES = [
   './', './index.html', './css/style.css', './js/app.js',
   './js/exchange.js', './js/quick-table.js', './js/phrases.js',

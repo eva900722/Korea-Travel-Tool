@@ -92,6 +92,16 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid 
 .speak-button { flex: 0 0 auto; min-width: 66px; min-height: 35px; padding: 6px 10px; border: 1px solid #cbd8c8; border-radius: 9px; background: #f5f9ee; color: var(--ink); font-size: 12px; font-weight: 700; }
 .phrase-actions button[aria-pressed="true"] { border-color: var(--ink); background: var(--accent); }
 .empty-message { padding: 25px 18px; border: 1px dashed var(--line); border-radius: 15px; color: var(--muted); text-align: center; }
+/* 自訂用語表單與批次勾選 */
+.custom-phrases { margin-top: 30px; padding-top: 4px; border-top: 1px solid var(--line); }
+.custom-phrase-form { padding: 18px; }
+.custom-phrase-form .search-label:not(:first-child) { margin-top: 15px; }
+.custom-phrase-button { min-height: 40px; padding: 8px 14px; border: 1px solid var(--ink); border-radius: 10px; background: var(--ink); color: var(--surface); font-size: 13px; font-weight: 700; }
+.custom-phrase-button:disabled { cursor: default; opacity: .5; }
+.custom-phrase-form .custom-phrase-button { margin-top: 17px; }
+.custom-phrase-toolbar { display: flex; justify-content: flex-end; margin: 17px 0 11px; }
+.phrase-select { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 10px; color: var(--muted); font-size: 13px; cursor: pointer; }
+.phrase-select input { width: 18px; height: 18px; margin: 0; accent-color: var(--ink); }
 .site-footer { padding: 15px 0 calc(26px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); color: #849188; font-size: 11px; text-align: center; }
 
 @media (min-width: 600px) {

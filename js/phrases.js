@@ -11,8 +11,17 @@ export async function initPhrases() {
   const filters = document.getElementById('phrase-filters');
   const list = document.getElementById('phrase-list');
   const listStatus = document.getElementById('phrase-list-status');
+  const customForm = document.getElementById('custom-phrase-form');
+  const customChinese = document.getElementById('custom-chinese');
+  const customKorean = document.getElementById('custom-korean');
+  const customRomanization = document.getElementById('custom-romanization');
+  const customStatus = document.getElementById('custom-phrase-status');
+  const customList = document.getElementById('custom-phrase-list');
+  const deleteSelected = document.getElementById('delete-selected-phrases');
   let phrases = [];
   let category = '全部';
+  const selectedIds = new Set();
+  let loaded = false;
 
   function speak(korean) {
     if (!('speechSynthesis' in window)) {
@@ -34,11 +43,19 @@ export async function initPhrases() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       phrases = next;
       render();
+      return true;
     } catch {
       listStatus.textContent = '無法儲存變更，請確認瀏覽器允許儲存網站資料。';
+      return false;
     }
   }
 
+  function updateDeleteButton() {
+    deleteSelected.disabled = selectedIds.size === 0;
+    deleteSelected.textContent = `刪除選取（${selectedIds.size}）`;
+  }
+
+  // 內建句子與自訂句子共用卡片；只有自訂句子可勾選批次刪除。
   function renderList() {
     const query = listSearch.value.trim().toLocaleLowerCase();
     const matches = phrases.filter((item) =>
@@ -46,9 +63,28 @@ export async function initPhrases() {
       [item.chinese, item.korean, item.romanization].some((value) => value.toLocaleLowerCase().includes(query))
     ).sort((a, b) => Number(b.pinned) - Number(a.pinned));
     list.replaceChildren();
+    customList.replaceChildren();
+    for (const id of selectedIds) {
+      if (!phrases.some((item) => item.id === id && item.custom)) selectedIds.delete(id);
+    }
     for (const item of matches) {
       const card = document.createElement('article');
       card.className = 'phrase-card';
+      if (item.custom) {
+        const selection = document.createElement('label');
+        selection.className = 'phrase-select';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = selectedIds.has(item.id);
+        checkbox.setAttribute('aria-label', `選取刪除：${item.chinese}`);
+        checkbox.addEventListener('change', () => {
+          if (checkbox.checked) selectedIds.add(item.id);
+          else selectedIds.delete(item.id);
+          updateDeleteButton();
+        });
+        selection.append(checkbox, '選取');
+        card.append(selection);
+      }
       const top = document.createElement('div');
       top.className = 'phrase-top';
       const intro = document.createElement('div');
@@ -92,7 +128,7 @@ export async function initPhrases() {
       romanization.className = 'phrase-romanization';
       romanization.textContent = item.romanization;
       card.append(top, korean, romanization);
-      list.append(card);
+      (item.custom ? customList : list).append(card);
     }
     if (!matches.length) {
       const empty = document.createElement('p');
@@ -100,7 +136,8 @@ export async function initPhrases() {
       empty.textContent = '找不到符合的語句。';
       list.append(empty);
     }
-    listStatus.textContent = `顯示 ${matches.length} 句常用語。發音功能依裝置的韓語語音支援而定。`;
+    listStatus.textContent = `顯示 ${matches.length} 句用語。發音功能依裝置的韓語語音支援而定。`;
+    updateDeleteButton();
   }
 
   function renderFilters() {
@@ -128,6 +165,39 @@ export async function initPhrases() {
   }
 
   listSearch.addEventListener('input', renderList);
+
+  // 手動新增與批次刪除共用既有的本機儲存。
+  customForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!loaded) {
+      customStatus.textContent = '常用語尚未載入，請重新整理後再試。';
+      return;
+    }
+    const chinese = customChinese.value.trim();
+    const korean = customKorean.value.trim();
+    if (!chinese || !korean) {
+      customStatus.textContent = '請填寫中文和韓文。';
+      (chinese ? customKorean : customChinese).focus();
+      return;
+    }
+    const item = { id: `custom-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      category: '我的用語', chinese, korean, romanization: customRomanization.value.trim(),
+      pinned: false, custom: true };
+    category = '全部';
+    listSearch.value = '';
+    if (save([...phrases, item])) {
+      customForm.reset();
+      customStatus.textContent = '已新增用語。';
+    }
+  });
+  deleteSelected.addEventListener('click', () => {
+    if (!selectedIds.size || !confirm(`確定刪除選取的 ${selectedIds.size} 句用語？`)) return;
+    if (save(phrases.filter((item) => !selectedIds.has(item.id)))) {
+      selectedIds.clear();
+      updateDeleteButton();
+      customStatus.textContent = '已刪除選取的用語。';
+    }
+  });
 
   // 文字會帶入 Google 翻譯網址，並盡可能複製到剪貼簿。
   search.addEventListener('input', () => {
@@ -181,7 +251,8 @@ export async function initPhrases() {
     if (!Array.isArray(data)) throw new Error('語句資料格式不正確');
     phrases = data.filter((item) => item && ['category', 'chinese', 'korean', 'romanization']
       .every((key) => typeof item[key] === 'string'))
-      .map((item, index) => ({ ...item, id: typeof item.id === 'string' ? item.id : `seed-${index}`, pinned: Boolean(item.pinned) }));
+      .map((item, index) => ({ ...item, id: typeof item.id === 'string' ? item.id : `seed-${index}`,
+        pinned: Boolean(item.pinned), custom: item.custom === true }));
 
     let saveError = false;
     if (saved === null) {
@@ -198,6 +269,7 @@ export async function initPhrases() {
       }
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(phrases)); } catch { saveError = true; }
     }
+    loaded = true;
     render();
     if (saveError) listStatus.textContent = '常用語已顯示，但無法在此裝置儲存變更。';
   } catch {

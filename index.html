@@ -109,6 +109,24 @@
         <div id="phrase-filters" class="filter-list" aria-label="常用語分類"></div>
         <div id="phrase-list" class="phrase-list"></div>
         <p id="phrase-list-status" class="note" role="status"></p>
+        <!-- 自訂用語：新增後顯示在內建常用語下方，可勾選多筆刪除 -->
+        <section class="custom-phrases" aria-labelledby="custom-phrases-heading">
+          <h3 id="custom-phrases-heading" class="pins-heading">我的用語</h3>
+          <form id="custom-phrase-form" class="custom-phrase-form card">
+            <label class="search-label" for="custom-chinese">中文</label>
+            <input id="custom-chinese" class="search-input" type="text" maxlength="200" required autocomplete="off">
+            <label class="search-label" for="custom-korean">韓文</label>
+            <input id="custom-korean" class="search-input" type="text" maxlength="200" required autocomplete="off" lang="ko">
+            <label class="search-label" for="custom-romanization">羅馬拼音（選填）</label>
+            <input id="custom-romanization" class="search-input" type="text" maxlength="200" autocomplete="off">
+            <button class="custom-phrase-button" type="submit">新增用語</button>
+          </form>
+          <p id="custom-phrase-status" class="note" role="status"></p>
+          <div class="custom-phrase-toolbar">
+            <button id="delete-selected-phrases" class="custom-phrase-button" type="button" disabled>刪除選取（0）</button>
+          </div>
+          <div id="custom-phrase-list" class="phrase-list"></div>
+        </section>
       </section>
     </main>
 
